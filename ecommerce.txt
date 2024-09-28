@@ -1,0 +1,241 @@
+Table Structure:
+Products Table: Contains information about products available for sale.
+Suppliers Table: Contains details about suppliers.
+Inventory Table: Tracks product stock levels, purchase costs, and sale prices.
+-----------------------------------------------------------------------------------------------
+
+Memory updated
+E-Commerce Inventory Management System Explanation
+In this project, we manage various aspects of an inventory system for an e-commerce platform, such as product information, supplier details, and stock levels. The system helps track product stock, manage supplier details, and generate reports for low-stock items. SQL queries are used for tasks like updating stock, calculating total stock value, and creating reports.
+
+Table Structure:
+Products Table: Contains information about products available for sale.
+Suppliers Table: Contains details about suppliers.
+Inventory Table: Tracks product stock levels, purchase costs, and sale prices.
+
+Table Definitions
+
+Products Table:
+
+sql
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(100),
+    Category VARCHAR(50)
+);
+
+
+Suppliers Table:
+
+sql
+
+CREATE TABLE Suppliers (
+    SupplierID INT PRIMARY KEY,
+    SupplierName VARCHAR(100),
+    ContactInfo VARCHAR(100)
+);
+
+Inventory Table:
+
+sql
+
+CREATE TABLE Inventory (
+    InventoryID INT PRIMARY KEY,
+    ProductID INT,
+    SupplierID INT,
+    StockQuantity INT,
+    PurchasePrice DECIMAL(10, 2),
+    SalePrice DECIMAL(10, 2),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID)
+);
+
+
+------------------------------------------------------------------------------
+
+Inserting Sample Data
+
+Products Table Data:
+sql
+
+INSERT INTO Products (ProductID, ProductName, Category)
+VALUES 
+(1, 'Laptop', 'Electronics'),
+(2, 'Mobile Phone', 'Electronics'),
+(3, 'Tablet', 'Electronics'),
+(4, 'Headphones', 'Accessories'),
+(5, 'Smartwatch', 'Accessories');
+
+Suppliers Table Data:
+sql
+
+INSERT INTO Suppliers (SupplierID, SupplierName, ContactInfo)
+VALUES 
+(1, 'Tech Supply Co.', 'contact@techsupply.com'),
+(2, 'Mobile Hub', 'info@mobilehub.com'),
+(3, 'Accessory World', 'support@accessoryworld.com');
+
+
+Inventory Table Data:
+sql
+
+INSERT INTO Inventory (InventoryID, ProductID, SupplierID, StockQuantity, PurchasePrice, SalePrice)
+VALUES 
+(1, 1, 1, 50, 500.00, 750.00),
+(2, 2, 2, 100, 300.00, 450.00),
+(3, 3, 2, 30, 200.00, 350.00),
+(4, 4, 3, 200, 20.00, 50.00),
+(5, 5, 3, 150, 150.00, 250.00);
+
+-----------------------------------------------------------------------------------------------------------
+1. Query to Retrieve Product and Supplier Information
+
+This query retrieves product names, categories, supplier names, and contact information using a JOIN between the Products, Suppliers, and Inventory tables.
+
+sql
+
+SELECT P.ProductName, P.Category, S.SupplierName, S.ContactInfo
+FROM Products P
+JOIN Inventory I ON P.ProductID = I.ProductID
+JOIN Suppliers S ON I.SupplierID = S.SupplierID;
+
+
+Result:
+sql
+
+ProductName   | Category     | SupplierName       | ContactInfo
+-------------------------------------------------------------------
+Laptop        | Electronics  | Tech Supply Co.    | contact@techsupply.com
+Mobile Phone  | Electronics  | Mobile Hub         | info@mobilehub.com
+Tablet        | Electronics  | Mobile Hub         | info@mobilehub.com
+Headphones    | Accessories  | Accessory World    | support@accessoryworld.com
+Smartwatch    | Accessories  | Accessory World    | support@accessoryworld.com
+
+
+
+------------------------------------------------------------------------------------------------------------------
+
+2. Query to Calculate Total Stock Value (SUM)
+This query calculates the total stock value of all products by multiplying the StockQuantity by the PurchasePrice and using the SUM aggregate function.
+
+sql
+
+SELECT SUM(StockQuantity * PurchasePrice) AS TotalStockValue
+FROM Inventory;
+Result:
+markdown
+
+TotalStockValue
+---------------
+47500.00
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+3. Query to List Low-Stock Items
+
+This query lists all products where the stock quantity is below a certain threshold (e.g., less than 50).
+
+sql
+
+SELECT P.ProductName, I.StockQuantity
+FROM Products P
+JOIN Inventory I ON P.ProductID = I.ProductID
+WHERE I.StockQuantity < 50;
+
+
+Result:
+markdown
+
+ProductName  | StockQuantity
+------------------------------
+Tablet       | 30
+
+--------------------------------------------------------------------------------------------------------------------
+
+
+4. Query to Update Stock Quantity
+
+This query updates the stock quantity for a specific product after receiving new stock from the supplier. Let’s say we received 20 new Laptops.
+
+sql
+
+UPDATE Inventory
+SET StockQuantity = StockQuantity + 20
+WHERE ProductID = 1;
+
+Result:
+The stock of Laptops is now 70 (50 + 20).
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+5. Query to Display Products with the Highest Stock
+
+This query retrieves the product with the highest stock by using the MAX function.
+
+sql
+
+SELECT P.ProductName, I.StockQuantity
+FROM Products P
+JOIN Inventory I ON P.ProductID = I.ProductID
+WHERE I.StockQuantity = (SELECT MAX(StockQuantity) FROM Inventory);
+Result:
+
+markdown
+
+ProductName | StockQuantity
+-----------------------------
+Headphones  | 200
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+6. Transaction: Stock Update and Report
+
+
+This query demonstrates a transaction where stock is updated and a report is generated. If any part of the transaction fails, the changes are rolled back.
+
+sql
+
+BEGIN TRANSACTION;
+
+UPDATE Inventory
+SET StockQuantity = StockQuantity - 5
+WHERE ProductID = 2;  -- Reduce stock of Mobile Phone by 5
+
+SELECT ProductName, StockQuantity
+FROM Products P
+JOIN Inventory I ON P.ProductID = I.ProductID
+WHERE I.ProductID = 2;
+
+COMMIT;
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
